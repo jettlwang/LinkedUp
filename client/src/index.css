@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
+/* PLEASE NOTE: THESE TAILWIND IMPORTS SHOULD NEVER BE DELETED */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+/* DO NOT DELETE THESE TAILWIND IMPORTS, OTHERWISE THE STYLING WILL NOT RENDER AT ALL */
+
+/* Global styles */
+@layer base {
+  html {
+    @apply antialiased;
+  }
+  body {
+    @apply font-sans text-gray-800 bg-gray-50;
+  }
+  /* Apply Space Grotesk to all heading elements */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+  /* Rounded duotone icons */
+  svg {
+    @apply stroke-[1.5px];
+  }
+  /* Button gradients - Duo-tone */
+  .btn-gradient-primary {
+    @apply bg-gradient-to-r from-secondary-500 to-secondary-600 hover:from-secondary-600 hover:to-secondary-700 text-white transition-all duration-300;
+  }
+  .btn-gradient-secondary {
+    @apply bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white transition-all duration-300;
+  }
+  .btn-gradient-tertiary {
+    @apply bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border border-gray-200 transition-all duration-300;
+  }
+  /* Duo-tone accent gradients */
+  .bg-duo-tone {
+    @apply bg-gradient-to-r from-primary-500 to-secondary-500;
+  }
+  /* Soft transitions */
+  .transition-soft {
+    @apply transition-all duration-300 ease-in-out;
+  }
+}
+/* Responsive sidebar adjustments */
+@media (max-width: 1023px) {
+  .sidebar-open {
+    overflow: hidden;
+  }
+}
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
