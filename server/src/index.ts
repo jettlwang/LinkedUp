@@ -35,23 +35,21 @@ app.post("/api/chat", chatLimiter, async (req, res, next) => {
         .json({ code: "BAD_REQUEST", message: parsed.error.issues[0].message });
     }
 
-    const { text, options } = parsed.data;
+    const { messages, model: reqModel, temperature } = parsed.data;
 
     const completion = await openai.chat.completions.create({
-      model,                                           // ⬅️ uses env-driven default
-      temperature: options?.temperature ?? 0.7,
-      messages: [
-        { role: "system", content: "You are a concise, friendly assistant." },
-        { role: "user", content: text }
-      ]
+      model: reqModel ?? model,          // default from env if FE didn't specify
+      temperature: temperature ?? 0.7,
+      messages                            // ← pass through exactly what FE sent
     });
 
     const answer = completion.choices[0]?.message?.content ?? "";
     res.json({ answer });
   } catch (err) {
-    next(err); // let the error handler standardize the response
+    next(err);
   }
 });
+
 
 // --- error handler LAST ---
 app.use(errorHandler);

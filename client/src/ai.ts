@@ -14,12 +14,15 @@ function withTimeout<T>(promise: Promise<T>, ms = DEFAULT_TIMEOUT_MS): Promise<T
   });
 }
 
-export async function chat(text: string, options?: ChatOptions, signal?: AbortSignal): Promise<ChatResponse> {
+type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
+type ChatPayload = { messages: ChatMessage[]; model?: string; temperature?: number };
+
+export async function chat(payload: ChatPayload, signal?: AbortSignal): Promise<ChatResponse> {
   const res = await withTimeout(
     fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, options }),
+      body: JSON.stringify(payload),
       signal
     })
   );
@@ -32,3 +35,4 @@ export async function chat(text: string, options?: ChatOptions, signal?: AbortSi
 
   return res.json();
 }
+

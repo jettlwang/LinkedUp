@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { ArrowRightIcon, ArrowLeftIcon, CheckIcon, EditIcon } from 'lucide-react';
+import ReactMarkdown from "react-markdown";
+
+
+import { chat } from '../ai';
+import { ONBOARDING_SUMMARY } from '../prompts';
+
+
 const Onboarding = () => {
   const navigate = useNavigate();
   const {
@@ -19,13 +26,27 @@ const Onboarding = () => {
   });
   // Derived data
   const firstName = fullName.split(' ')[0];
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step < 4) {
       // If moving to the AI summary step, generate the summary
       if (step === 3) {
         // Mock AI processing - in a real app, this would be an API call
-        const generatedSummary = processWithAI(situationDescription, demographics);
-        setAiSummary(generatedSummary);
+        //const generatedSummary = processWithAI(situationDescription, demographics);
+        //setAiSummary(generatedSummary);
+
+        try {
+          // Call backend API with fixed system prompt + user text
+          const { answer } = await chat({
+            messages: [
+              { role: "system", content: ONBOARDING_SUMMARY },
+              { role: "user", content: situationDescription }
+            ]
+          });
+          setAiSummary(answer);
+        } catch (err: any) {
+          console.error("AI summary failed", err);
+          setAiSummary("⚠️ Could not generate summary. Please try again.");
+        }
       }
       setStep(step + 1);
     } else {
@@ -168,7 +189,9 @@ const Onboarding = () => {
                     </button>
                   </div>
                 </div> : <div className="mb-4 pb-4 border-b border-gray-200">
-                  <p className="text-gray-800">{aiSummary}</p>
+                  <div className="prose prose-sm max-w-none text-gray-800">
+                    <ReactMarkdown>{aiSummary}</ReactMarkdown>
+                  </div>
                 </div>}
             </div>}
           {/* Navigation buttons */}

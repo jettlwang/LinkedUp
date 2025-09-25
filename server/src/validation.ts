@@ -1,11 +1,14 @@
 import { z } from "zod";
 
+const chatMessage = z.object({
+  role: z.enum(["system", "user", "assistant"]),
+  content: z.string().trim().min(1).max(4000)
+});
+
 export const chatBodySchema = z.object({
-  text: z.string().trim().min(1, "Text is required").max(4000),
-  // allow optional options now for future use
-  options: z.object({
-    temperature: z.number().min(0).max(2).optional()
-  }).optional()
+  messages: z.array(chatMessage).min(1),
+  model: z.string().optional(),
+  temperature: z.number().min(0).max(2).optional()
 });
 
 export type ChatBody = z.infer<typeof chatBodySchema>;
