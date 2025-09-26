@@ -340,15 +340,8 @@ setAboutMeetingSummary(event);
                     Here's our summary
                   </h2>
                   <p className="text-gray-600 mb-2">
-                    We've created two summaries - one for {name}'s profile and
-                    one for your interaction.
+                    You can edit this or go back and try again if it doesn't sound right.
                   </p>
-                  <div className="flex justify-end">
-                    <button onClick={handleRegenerateAll} className="text-sm text-primary-600 hover:text-primary-800 flex items-center">
-                      <RefreshCwIcon className="h-3 w-3 mr-1" />
-                      Regenerate All
-                    </button>
-                  </div>
                 </div>
                 {/* About Person Summary */}
                 <div className="mb-6">

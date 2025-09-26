@@ -3,12 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { ArrowRightIcon, ArrowLeftIcon, CheckIcon, EditIcon } from 'lucide-react';
 import ReactMarkdown from "react-markdown";
+import confetti from 'canvas-confetti';
 
 
 import { chat } from '../ai';
 import { ONBOARDING_SUMMARY } from '../prompts';
 
-
+const triggerConfetti = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: {
+        y: 0.6
+      }
+    });
+  };
 const Onboarding = () => {
   const navigate = useNavigate();
   const {
@@ -19,6 +28,7 @@ const Onboarding = () => {
   const [fullName, setFullName] = useState('');
   const [demographics, setDemographics] = useState('');
   const [situationDescription, setSituationDescription] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
   const [aiSummary, setAiSummary] = useState('');
   const [isEditingSummary, setIsEditingSummary] = useState(false);
   const [preferences, setPreferences] = useState({
@@ -30,10 +40,7 @@ const Onboarding = () => {
     if (step < 4) {
       // If moving to the AI summary step, generate the summary
       if (step === 3) {
-        // Mock AI processing - in a real app, this would be an API call
-        //const generatedSummary = processWithAI(situationDescription, demographics);
-        //setAiSummary(generatedSummary);
-
+        setIsProcessing(true);
         try {
           // Call backend API with fixed system prompt + user text
           const { answer } = await chat({
@@ -46,7 +53,9 @@ const Onboarding = () => {
         } catch (err: any) {
           console.error("AI summary failed", err);
           setAiSummary("⚠️ Could not generate summary. Please try again.");
-        }
+          } finally {
+            setIsProcessing(false);
+          }
       }
       setStep(step + 1);
     } else {
@@ -64,6 +73,7 @@ const Onboarding = () => {
         };
         // Complete onboarding and ensure localStorage is updated
         completeOnboarding(profile);
+        triggerConfetti();
         // Force a reload to ensure React Router picks up the localStorage change
         window.location.href = '/';
       } catch (error) {
@@ -174,8 +184,7 @@ const Onboarding = () => {
                   Here's how we understood your story
                 </h2>
                 <p className="text-gray-600 mb-4">
-                  You can edit this or go back and try again if it doesn't sound
-                  right.
+                  You can edit this or go back and try again if it doesn't sound right.
                 </p>
               </div>
               {isEditingSummary ? <div className="mb-4">
@@ -206,9 +215,11 @@ const Onboarding = () => {
                 <EditIcon className="h-4 w-4 mr-1" />
                 Edit
               </button>}
-            <button type="button" onClick={handleNext} disabled={step === 1 && !fullName || step === 3 && !situationDescription} className={`
+            <button type="button" onClick={handleNext} 
+              disabled={step === 1 && !fullName || step === 3 && !situationDescription || isProcessing } 
+              className={`
                 inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-xl
-                ${step === 1 && !fullName || step === 3 && !situationDescription ? 'opacity-60 cursor-not-allowed' : 'hover:bg-primary-700'}
+                ${step === 1 && !fullName || step === 3 && !situationDescription || isProcessing ? 'opacity-60 cursor-not-allowed' : 'hover:bg-primary-700'}
               `}>
               {step < 4 ? 'Continue' : 'Get Started'}
               {step < 4 && <ArrowRightIcon className="ml-2 h-4 w-4" />}
