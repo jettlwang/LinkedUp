@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { formatRelativeTime } from '../utils/dateUtils';
 import { ArrowLeftIcon, CalendarIcon, MessageSquareIcon, PlusIcon, EditIcon, RefreshCwIcon } from 'lucide-react';
+import ReactMarkdown from "react-markdown";
+
 const ContactDetail = () => {
   const {
     id
@@ -246,7 +248,9 @@ const ContactDetail = () => {
                     </button>
                   </div>
                 </div> : <div className="text-gray-700 mb-6">
-                  {contact.infoAiSummary || 'No AI summary available.'}
+                    <div className="prose prose-sm max-w-none">
+                      <ReactMarkdown>{contact.infoAiSummary || 'No AI summary available.'}</ReactMarkdown>
+                    </div>
                 </div>}
             </div>
           </div>

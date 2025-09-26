@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { formatRelativeTime } from '../utils/dateUtils';
+import ReactMarkdown from "react-markdown";
+
 import { ArrowLeftIcon, EditIcon, Trash2Icon, UserIcon, CalendarIcon, TagIcon, MessageSquareIcon, CheckIcon, XIcon, BellIcon, RefreshCwIcon } from 'lucide-react';
 const InteractionDetail = () => {
   const {
@@ -313,7 +315,9 @@ const InteractionDetail = () => {
                   </button>
                 </div>
               </div> : <div className="text-gray-700 mb-6">
-                {event.notesAiSummary || 'No AI summary available.'}
+                    <div className="prose prose-sm max-w-none">
+                      <ReactMarkdown>{event.notesAiSummary || 'No AI summary available.'}</ReactMarkdown>
+                    </div>
               </div>}
           </div>
           {/* Full Notes Section */}
