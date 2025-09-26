@@ -40,12 +40,23 @@ export type UserProfile = {
     messageTone: 'professional' | 'casual' | 'sincere';
   };
 };
+
+// NEW: shape for passing a single interaction into the chat
+type InteractionContext = {
+  dateISO: string;
+  notesAiSummary: string;
+  tags?: string[];
+};
+
+// Update ChatContext to include `interaction`
 export type ChatContext = {
   isOpen: boolean;
   contactId?: string;
-  eventId?: string;
+  eventId?: string; // keep for later, unused in MVP
+  interaction?: InteractionContext; // <-- add this
   tone?: 'professional' | 'casual' | 'sincere';
 };
+
 type AppContextType = {
   contacts: Contact[];
   events: Event[];

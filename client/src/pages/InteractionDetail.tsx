@@ -5,6 +5,7 @@ import { formatRelativeTime } from '../utils/dateUtils';
 import ReactMarkdown from "react-markdown";
 
 import { ArrowLeftIcon, EditIcon, Trash2Icon, UserIcon, CalendarIcon, TagIcon, MessageSquareIcon, CheckIcon, XIcon, BellIcon, RefreshCwIcon } from 'lucide-react';
+
 const InteractionDetail = () => {
   const {
     id
@@ -17,8 +18,10 @@ const InteractionDetail = () => {
     contacts,
     updateEvent,
     deleteEvent,
-    openChat
+    openChat,
+    userProfile
   } = useApp();
+
   // Find the event
   const event = events.find(e => e.id === id);
   const contact = event ? contacts.find(c => c.id === event.contactId) : null;
@@ -64,11 +67,26 @@ const InteractionDetail = () => {
   };
   // Handle opening the chat window with contact context
   const handleOpenChat = () => {
+
+    // DEBUG
+    console.log("Opening chat with context:", {
+      contactId: contact.id,
+      eventId: event.id,
+      tone: userProfile?.preferences?.messageTone
+        || contact?.preferences?.messageTone
+        || 'professional'
+    });
+
     openChat({
-      contactId: contact?.id,
-      tone: contact?.preferences?.messageTone || 'professional'
+      contactId: contact.id,
+      eventId: event.id, // <-- include the specific interaction
+      // Prefer user's tone first; fallback to contact pref; then default
+      tone: userProfile?.preferences?.messageTone
+        || contact?.preferences?.messageTone
+        || 'professional'
     });
   };
+
   // Save functions for each editable field
   const saveDate = () => {
     updateEvent(id!, {
