@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { CheckIcon, XIcon, RefreshCwIcon, EditIcon } from 'lucide-react';
+import ReactMarkdown from "react-markdown";
+
 const Profile = () => {
   const {
     userProfile,
@@ -97,7 +99,7 @@ const Profile = () => {
 
       <div className="space-y-12">
         {/* Name Field */}
-        <div className="space-y-2">
+        <div className="space-y-2 pb-6 border-b border-gray-100">
           <div>
             <div className="flex items-center justify-between mb-1">
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -156,7 +158,7 @@ const Profile = () => {
           </div>
           </div>
           {/* About You Section */}
-          <div>
+          <div className="pb-6 border-b border-gray-100">
             <div className="flex items-center justify-between mb-4">
               <h2 className="block text-gray-700">About You</h2>
               {!isEditingRawInput && <button type="button" onClick={handleRegenerate} className="inline-flex items-center px-3 py-1 text-sm font-medium text-primary-600 hover:text-primary-800">
@@ -205,8 +207,8 @@ const Profile = () => {
                       Cancel
                     </button>
                   </div>
-                </div> : <div className="text-gray-700">
-                  {backgroundAiSummary || 'No AI summary available.'}
+                </div> : <div className="prose prose-sm text-gray-700">
+                  <ReactMarkdown>{backgroundAiSummary || 'No AI summary available.'}</ReactMarkdown>
                 </div>}
             </div>
           </div>

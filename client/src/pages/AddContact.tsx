@@ -3,6 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { ArrowLeftIcon, ArrowRightIcon, XIcon, EditIcon, CheckIcon, RefreshCwIcon } from 'lucide-react';
 import confetti from 'canvas-confetti';
+
+import ReactMarkdown from "react-markdown";
+import { chat } from '../ai';
+import { ADD_CONTACT_SUMMARY } from '../prompts';
+
 const AddContact = () => {
   const navigate = useNavigate();
   const {
@@ -30,22 +35,60 @@ const AddContact = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   // Format options
   const formatOptions = ['Event', 'Coffee Chat', 'Intro', 'Other'];
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === 1) {
       // Validate required fields
       if (!name || !meetingDate || !selectedFormat) return;
       setStep(2);
     } else if (step === 2) {
-      // Generate AI summaries before proceeding to review
       if (!meetingStory.trim()) return;
-      // Mock AI processing
-      const {
-        personSummary,
-        meetingSummary
-      } = processStoryWithAI(meetingStory, name);
-      setAboutPersonSummary(personSummary);
-      setAboutMeetingSummary(meetingSummary);
-      setStep(3);
+
+      setIsProcessing(true);
+      try {
+        // 1) read onboarding profile summary from localStorage
+        const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
+        const profileSummary = (profile?.backgroundAiSummary || "").trim();
+
+        // DEBUG: BEFORE the API call
+        /*
+        console.log("[AddContact] About to call chat()", {
+          order: ["PROFILE_AI_SUMMARY (user)", "ADD_CONTACT_SUMMARY (system)", "NEW_MEETING_INPUT (user)"],
+          profileSummaryPreview: profileSummary.slice(0, 160),
+          systemPromptPreview: (ADD_CONTACT_SUMMARY || "").slice(0, 160),
+          meetingInputPreview: meetingStory.trim().slice(0, 160),
+        });*/
+
+        // 2) call AI with your requested order
+        const { answer } = await chat({
+          messages: [
+            { role: "user",   content: profileSummary },
+            { role: "system", content: ADD_CONTACT_SUMMARY },
+            { role: "user",   content: meetingStory }
+          ]
+        });
+
+        // 3) parse { contact, event } JSON or fall back to raw markdown
+        // Expect strict JSON with string values
+        try {
+          const parsed = JSON.parse(answer);
+          setAboutPersonSummary(parsed.contact || "");
+          setAboutMeetingSummary(parsed.event || "");
+        } catch (err) {
+          console.error("Failed to parse AI JSON", err);
+          setAboutPersonSummary(answer);
+          setAboutMeetingSummary(answer);
+        }
+
+
+        setStep(3);
+      } catch (err) {
+        console.error("AI generation failed", err);
+        setAboutPersonSummary("⚠️ Could not generate summary. You can still edit this box manually.");
+        setAboutMeetingSummary("⚠️ Could not generate summary. You can still edit this box manually.");
+      } finally {
+        setIsProcessing(false);
+      }
+
     } else if (step === 3) {
       // Proceed to follow-up frequency selection
       setStep(4);
@@ -80,14 +123,66 @@ const AddContact = () => {
     setAboutMeetingSummary(tempMeetingSummary);
     setIsEditingMeetingSummary(false);
   };
-  const handleRegenerateAll = () => {
-    const {
-      personSummary,
-      meetingSummary
-    } = processStoryWithAI(meetingStory, name);
-    setAboutPersonSummary(personSummary);
-    setAboutMeetingSummary(meetingSummary);
+  const handleRegenerateAll = async () => {
+    if (!meetingStory.trim()) return;
+
+    setIsProcessing(true);
+    try {
+      const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
+      const profileSummary = (profile?.backgroundAiSummary || "").trim();
+
+      const { answer } = await chat({
+        messages: [
+          { role: "user",   content: profileSummary },
+          { role: "system", content: ADD_CONTACT_SUMMARY },
+          { role: "user",   content: meetingStory }
+        ]
+      });
+
+      //
+      let contact = "";
+      let event = "";
+
+      try {
+        const parsed = JSON.parse(answer);
+
+        // Convert object/array → simple Markdown
+        const toMd = (val: unknown): string => {
+          if (typeof val === "string") return val;
+          if (Array.isArray(val)) return val.map(item => `- ${String(item)}`).join("\n");
+          if (val && typeof val === "object") {
+            return Object.entries(val as Record<string, unknown>)
+              .map(([k, v]) => {
+                if (Array.isArray(v)) return `**${k}:**\n${v.map(i => `- ${String(i)}`).join("\n")}`;
+                if (v && typeof v === "object") return `**${k}:** ${JSON.stringify(v)}`;
+                return `**${k}:** ${String(v)}`;
+              })
+              .join("\n");
+          }
+          return String(val);
+        };
+
+        contact = toMd(parsed?.contact);
+        event   = toMd(parsed?.event);
+      } catch {
+        // If it wasn't valid JSON, just render whatever came back
+        contact = answer;
+        event   = answer;
+      }
+
+setAboutPersonSummary(contact);
+setAboutMeetingSummary(event);
+
+
+      setAboutPersonSummary(contact);
+      setAboutMeetingSummary(event);
+    } catch (err) {
+      console.error("Regenerate failed", err);
+    } finally {
+      setIsProcessing(false);
+    }
   };
+
   const triggerConfetti = () => {
     confetti({
       particleCount: 100,
@@ -125,6 +220,13 @@ const AddContact = () => {
       };
       // Add interaction to context
       addEvent(newEvent);
+
+      // Save the AI summaries to feature-scoped localStorage (MVP cache)
+      try {
+        localStorage.setItem("ai:addContact:contact", aboutPersonSummary || "");
+        localStorage.setItem("ai:addContact:event",   aboutMeetingSummary || "");
+      } catch {}
+
       // Trigger confetti animation
       triggerConfetti();
       // Redirect to contacts page after a short delay
@@ -269,9 +371,13 @@ const AddContact = () => {
                           Cancel
                         </button>
                       </div>
-                    </div> : <div className="p-4 bg-gray-50 rounded-xl text-gray-700 mb-6">
-                      {aboutPersonSummary}
-                    </div>}
+                    </div> : (
+                      <div className="p-4 bg-gray-50 rounded-xl text-gray-700 mb-6">
+                        <div className="prose prose-sm max-w-none">
+                          <ReactMarkdown>{aboutPersonSummary}</ReactMarkdown>
+                        </div>
+                      </div>
+                    )}
                 </div>
                 {/* About Meeting Summary */}
                 <div className="mb-4">
@@ -294,9 +400,13 @@ const AddContact = () => {
                           Cancel
                         </button>
                       </div>
-                    </div> : <div className="p-4 bg-gray-50 rounded-xl text-gray-700">
-                      {aboutMeetingSummary}
-                    </div>}
+                    </div> : (
+                      <div className="p-4 bg-gray-50 rounded-xl text-gray-700">
+                        <div className="prose prose-sm max-w-none">
+                          <ReactMarkdown>{aboutMeetingSummary}</ReactMarkdown>
+                        </div>
+                      </div>
+                    )}
                 </div>
               </div>}
             {/* Step 4: Follow-up Frequency */}
