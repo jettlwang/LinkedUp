@@ -73,9 +73,9 @@ const Onboarding = () => {
         };
         // Complete onboarding and ensure localStorage is updated
         completeOnboarding(profile);
-        triggerConfetti();
         // Force a reload to ensure React Router picks up the localStorage change
         window.location.href = '/';
+        triggerConfetti();
       } catch (error) {
         console.error('Error during onboarding completion:', error);
       }

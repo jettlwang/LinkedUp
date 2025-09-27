@@ -175,7 +175,7 @@ const Contacts = () => {
                               {contact.name}
                             </h3>
                             <span className="text-sm text-gray-600 truncate">
-                              - {contact.infoAiSummary || contact.infoRaw}
+                              - {contact.infoAiShort || contact.infoAiSummary || contact.infoRaw}
                             </span>
                           </div>
                         </div>
