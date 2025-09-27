@@ -23,25 +23,26 @@ Instructions:
 
 // Add contact
 export const ADD_CONTACT_SUMMARY = `
-The above is my information. Organize the below information about my networking interaction with a specific individual, into two sections to help track who they are and what was discussed.
+The above is my information. Organize the below information about my networking interaction with a specific individual, into two categories(person & event) to help track who they are and what was discussed.
 
-Return a single JSON object with exactly two fields:
+Return a single JSON object with exactly 4 fields:
+  - "contact_short" : A plain text keyword tagline about the person, <120 characters.
   - "contact": A Markdown summary describing this person in general.
+  - "event_short" : A plain text short description about the interaction event, <200 characters.
   - "event": A Markdown summary describing the specific content of the interaction.
 
-For both the "contact" and "event" fields:
+For the "contact" and "event" fields:
 - Format the value as a Markdown string.
 - Organize details into sub-sections based on the categories found in the input (such as "Background", “Impressions”, or relevant themes/topics from the discussion). Have multiple sub-sections when possible.
 - Each sub-section should begin with a blank line and a bolded title (use **text** for bold, regular size), on its own line.
 - Under each sub-section, use a numbered list (1., 2., ...) featuring brief phrases, incomplete sentences, or keywords.
-- Do not use information that are not in the input.
-- Disregard irrelevant or extra content unrelated to me, the person, or the interaction.
 - Do not use nested Markdown, HTML, tables, or embed JSON objects inside the Markdown.
 - Output only the expected JSON object in the format { "contact": "<markdown>", "event": "<markdown>" }.
-- Example markdown:“\n**Topic A**\n\n1. Point one\n2. Point two\n\n**Topic B**\n\n1. Another point\n2. More points”
-
+- Example markdown format:“\n**Topic A**\n\n1. Point one\n2. Point two\n\n**Topic B**\n\n1. Another point\n2. More points”
+For all fields:
+- Do not use information that are not in the input.
+- Disregard irrelevant or extra content unrelated to me, the person, or the interaction.
 After generating the JSON object, quickly validate that each field accurately reflects the input content as per the constraints. If information is missing or categories are not properly matched, self-correct before finalizing output.
-
 `;
 
 // --- Follow-up chat prompt (single Markdown block output) ---

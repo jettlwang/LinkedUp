@@ -162,7 +162,7 @@ const ContactDetail = () => {
         </h1>
 
         <p className="text-gray-600 mt-1">
-          {contact.infoAiSummary || contact.infoRaw}
+          {contact.infoAiShort || contact.infoAiSummary}
         </p>
 
         <div className="mt-2">
@@ -289,7 +289,7 @@ const ContactDetail = () => {
                     {/* Content */}
                     <div className="ml-10 flex-1 bg-white p-4 rounded-lg border border-gray-100 shadow-sm hover:border-primary-200 transition-colors">
                       <p className="text-sm text-gray-800 font-medium mb-1">
-                        {event.notesAiSummary || event.notesRaw}
+                        {event.notesAiShort || event.notesAiSummary || event.notesRaw}
                       </p>
                       <div className="flex justify-between items-center">
                         <p className="text-xs text-gray-500">

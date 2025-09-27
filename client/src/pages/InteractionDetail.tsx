@@ -170,7 +170,7 @@ const InteractionDetail = () => {
             <div className="flex items-center mb-4">
               <CalendarIcon className="h-6 w-6 text-gray-400 mr-2" />
               <h1 className="text-2xl font-bold text-gray-800">
-                Interaction Details
+                 {event.notesAiShort || "Interaction Details"}
               </h1>
             </div>
             {/* Contact Info */}

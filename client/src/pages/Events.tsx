@@ -105,7 +105,7 @@ const Events = () => {
             <div className="divide-y divide-gray-100">
               {sortedEvents.map(event => {
             const contact = contacts.find(c => c.id === event.contactId);
-            const truncatedNotes = (event.notesAiSummary || event.notesRaw).length > 60 ? (event.notesAiSummary || event.notesRaw).substring(0, 60) + '...' : event.notesAiSummary || event.notesRaw;
+            const truncatedNotes = (event.notesAiShort || event.notesAiSummary || event.notesRaw).length > 60 ? (event.notesAiShort || event.notesAiSummary || event.notesRaw).substring(0, 60) + '...' : event.notesAiShort || event.notesAiSummary || event.notesRaw;
             return <div key={event.id} className="group hover:bg-gray-50 transition-colors duration-200 cursor-pointer" onClick={() => navigate(`/events/${event.id}`)}>
                     <div className="px-6 py-4">
                       <div className="flex items-center">
@@ -123,7 +123,7 @@ const Events = () => {
                               {contact?.name || 'Unknown Contact'}
                             </Link>
                             <span className="text-sm text-gray-600 truncate">
-                              - {truncatedNotes}
+                              {truncatedNotes}
                             </span>
                           </div>
                         </div>

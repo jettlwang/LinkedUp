@@ -2,7 +2,7 @@ export const formatRelativeTime = (dateString: string): string => {
   const date = new Date(dateString);
   const now = new Date();
   const diffInMs = now.getTime() - date.getTime();
-  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+  const diffInDays = Math.max(0, Math.floor(diffInMs / (1000 * 60 * 60 * 24)));
   const diffInWeeks = Math.floor(diffInDays / 7);
   const diffInMonths = Math.floor(diffInDays / 30);
   // If more than 6 months, show actual date
@@ -14,7 +14,7 @@ export const formatRelativeTime = (dateString: string): string => {
     });
   }
   // Within 6 months, show relative time
-  if (diffInDays === 0) {
+  if (diffInDays <= 0) {
     return 'today';
   } else if (diffInDays === 1) {
     return '1 day ago';
@@ -45,7 +45,7 @@ export const formatRelativeTimeShort = (dateString: string): string => {
     });
   }
   // Within 6 months, show relative time
-  if (diffInDays === 0) {
+  if (diffInDays <= 0) {
     return 'today';
   } else if (diffInDays === 1) {
     return '1d ago';

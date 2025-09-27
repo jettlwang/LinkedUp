@@ -158,7 +158,7 @@ const Dashboard = () => {
                           {contact?.name || 'Unknown Contact'}
                         </h3>
                         <p className="text-sm text-gray-600 mt-1">
-                          {event.notesAiSummary || event.notesRaw}
+                          {event.notesAiShort || event.notesAiSummary || event.notesRaw}
                         </p>
                       </div>
                     </div>

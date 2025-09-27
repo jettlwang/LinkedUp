@@ -118,9 +118,9 @@ const Sidebar: React.FC<SidebarProps> = ({
           <button onClick={() => openChat()} className={`
               flex items-center justify-center text-sm font-medium text-white rounded-2xl btn-gradient-primary transition-soft
               ${isCollapsed ? 'w-12 h-12 rounded-full' : 'w-full px-5 py-3'}
-            `} title={isCollapsed ? 'Draft Message' : ''}>
+            `} title={isCollapsed ? 'Ask LinkedAI' : ''}>
             <MessageSquareIcon size={18} className={isCollapsed ? '' : 'mr-2'} />
-            {!isCollapsed && 'Draft Message'}
+            {!isCollapsed && 'Ask LinkedAI'}
           </button>
           {!isCollapsed && <>
               <Link to="/add-contact" className="flex items-center justify-center w-full px-5 py-3 text-sm font-medium text-primary-600 bg-white border border-primary-200 rounded-2xl hover:bg-primary-50 transition-soft">

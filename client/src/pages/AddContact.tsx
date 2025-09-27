@@ -25,6 +25,8 @@ const AddContact = () => {
   // AI summary states
   const [aboutPersonSummary, setAboutPersonSummary] = useState('');
   const [aboutMeetingSummary, setAboutMeetingSummary] = useState('');
+  const [aboutPersonShort, setAboutPersonShort] = useState('');   // NEW
+  const [aboutMeetingShort, setAboutMeetingShort] = useState(''); // NEW
   const [isEditingPersonSummary, setIsEditingPersonSummary] = useState(false);
   const [isEditingMeetingSummary, setIsEditingMeetingSummary] = useState(false);
   const [tempPersonSummary, setTempPersonSummary] = useState('');
@@ -73,10 +75,14 @@ const AddContact = () => {
           const parsed = JSON.parse(answer);
           setAboutPersonSummary(parsed.contact || "");
           setAboutMeetingSummary(parsed.event || "");
+          setAboutPersonShort(parsed.contact_short || "");
+          setAboutMeetingShort(parsed.event_short || "");
         } catch (err) {
           console.error("Failed to parse AI JSON", err);
           setAboutPersonSummary(answer);
           setAboutMeetingSummary(answer);
+          setAboutPersonShort(oneLine(answer));
+          setAboutMeetingShort(oneLine(answer));
         }
 
 
@@ -143,39 +149,24 @@ const AddContact = () => {
       let contact = "";
       let event = "";
 
+      // Parse strict JSON with 4 string fields; fall back to raw if needed
       try {
         const parsed = JSON.parse(answer);
-
-        // Convert object/array → simple Markdown
-        const toMd = (val: unknown): string => {
-          if (typeof val === "string") return val;
-          if (Array.isArray(val)) return val.map(item => `- ${String(item)}`).join("\n");
-          if (val && typeof val === "object") {
-            return Object.entries(val as Record<string, unknown>)
-              .map(([k, v]) => {
-                if (Array.isArray(v)) return `**${k}:**\n${v.map(i => `- ${String(i)}`).join("\n")}`;
-                if (v && typeof v === "object") return `**${k}:** ${JSON.stringify(v)}`;
-                return `**${k}:** ${String(v)}`;
-              })
-              .join("\n");
-          }
-          return String(val);
-        };
-
-        contact = toMd(parsed?.contact);
-        event   = toMd(parsed?.event);
-      } catch {
-        // If it wasn't valid JSON, just render whatever came back
-        contact = answer;
-        event   = answer;
+        setAboutPersonSummary(parsed.contact || "");
+        setAboutMeetingSummary(parsed.event || "");
+        setAboutPersonShort(parsed.contact_short || "");
+        setAboutMeetingShort(parsed.event_short || "");
+      } catch (err) {
+        console.error("Failed to parse AI JSON", err);
+        // fallback: show raw in long boxes, derive short by truncation
+        setAboutPersonSummary(answer);
+        setAboutMeetingSummary(answer);
+        const oneLine = (s: string) => s.replace(/\s+/g, " ").trim().slice(0, 120);
+        setAboutPersonShort(oneLine(answer));
+        setAboutMeetingShort(oneLine(answer));
       }
 
-setAboutPersonSummary(contact);
-setAboutMeetingSummary(event);
 
-
-      setAboutPersonSummary(contact);
-      setAboutMeetingSummary(event);
     } catch (err) {
       console.error("Regenerate failed", err);
     } finally {
@@ -201,6 +192,7 @@ setAboutMeetingSummary(event);
         name,
         infoRaw: meetingStory,
         infoAiSummary: aboutPersonSummary,
+        infoAiShort: aboutPersonShort,
         lastReachOutDate: new Date(meetingDate).toISOString(),
         preferences: {
           followUpFrequency: followUpFrequency,
@@ -213,6 +205,7 @@ setAboutMeetingSummary(event);
       const newEvent = {
         contactId,
         notesRaw: meetingStory,
+        notesAiShort: aboutMeetingShort, 
         notesAiSummary: aboutMeetingSummary,
         date: new Date(meetingDate).toISOString(),
         followUpStatus: 'done' as const,
@@ -225,6 +218,8 @@ setAboutMeetingSummary(event);
       try {
         localStorage.setItem("ai:addContact:contact", aboutPersonSummary || "");
         localStorage.setItem("ai:addContact:event",   aboutMeetingSummary || "");
+        localStorage.setItem("ai:addContact:contact_short", aboutPersonShort || "");
+        localStorage.setItem("ai:addContact:event_short",   aboutMeetingShort || "");
       } catch {}
 
       // Trigger confetti animation
